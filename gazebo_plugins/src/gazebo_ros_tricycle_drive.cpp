@@ -559,20 +559,17 @@ void GazeboRosTricycleDrivePrivate::MotorController(
 
   // if max_steering_speed_ is > 0, use speed control, otherwise use position control
   // With position control, one cannot expect dynamics to work correctly.
-  double diff_angle = current_angle - target_angle;
+  double diff_angle = target_angle - current_angle;
   double applied_steering_speed = 0;
-  if (max_steering_speed_ > 0) {
-    // this means we will steer using steering speed
-    if (fabs(diff_angle) < max_steering_angle_tol_) {
-      // we're withing angle tolerance
+  if (max_steering_speed_ > 0){
+    if (fabs(diff_angle) < max_steering_angle_tol_)
       applied_steering_speed = 0;
-    } else if (diff_angle < target_speed) {
-      // steer toward target angle
-      applied_steering_speed = max_steering_speed_;
-    } else {
-      // steer toward target angle
-      applied_steering_speed = -max_steering_speed_;
-    }
+      else if (diff_angle >= 0 ){
+        applied_steering_speed = max_steering_speed_;
+      } else
+      {
+        applied_steering_speed = -max_steering_speed_;
+      }
 
     // use speed control, not recommended, for better dynamics use force control
     joints_[STEERING]->SetParam("vel", 0, applied_steering_speed);
