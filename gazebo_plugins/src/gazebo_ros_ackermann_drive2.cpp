@@ -86,7 +86,7 @@ public:
   };
 
   /// Indicates which joint
-  enum
+  enum JointType
   {
     /// Steering joint
     STEERING,
@@ -142,6 +142,18 @@ public:
   /// \param[in] target_angle Required yaw orientation of robot
   /// \param[in] dt time difference between consecutive motor commands
   void MotorController(double target_speed, double target_angle, double dt);
+
+  /// Determines required speed of the wheels based on target vel
+  /// \param[in] target_speed Required speed of robot
+  /// \param[in] target_angle Required yaw orientation of robot
+  /// \param[in] dt time difference between consecutive motor commands
+  void SpeedController(JointType joint, double target_speed, double dt);
+
+  /// Determines required speed of the wheels based on target vel
+  /// \param[in] target_speed Required speed of robot
+  /// \param[in] target_angle Required yaw orientation of robot
+  /// \param[in] dt time difference between consecutive motor commands
+  void SteeringController(JointType joint, double target_angle, double dt);
 
   /// A pointer to the GazeboROS node.
   gazebo_ros::Node::SharedPtr ros_node_;
@@ -535,12 +547,7 @@ void GazeboRosAckermannDrive2Private::OnUpdate(const gazebo::common::UpdateInfo&
   if (seconds_since_last_update < update_period_)
   {
     return;
-  }
-
-  if (publish_odom_)
-  {
-#ifdef IGN_PROFILER_ENABLE
-    IGN_PROFILE_BEGIN("PublishOdometryMsg");
+    SpeedController IGN_PROFILE_BEGIN("PublishOdometryMsg");
 #endif
     PublishOdometryMsg(current_time);
 #ifdef IGN_PROFILER_ENABLE
@@ -587,12 +594,11 @@ void GazeboRosAckermannDrive2Private::OnUpdate(const gazebo::common::UpdateInfo&
   last_actuator_update_ = _info.simTime;
 }
 
-void GazeboRosAckermannDrive2Private::MotorController(double target_speed, double target_angle, double dt)
+void GazeboRosAckermannDrive2Private::SpeedController(JointType joint, double target_speed, double dt)
 {
   double applied_speed = target_speed;
-  double applied_angle = target_angle;
 
-  double current_speed = joints_[WHEEL_ACTUATED]->GetVelocity(0);
+  double current_speed = joints_[joint]->GetVelocity(0);
   if (max_wheel_accel_ > 0 || max_wheel_decel_ > 0)
   {
     double diff_speed = current_speed - target_speed;
@@ -610,11 +616,13 @@ void GazeboRosAckermannDrive2Private::MotorController(double target_speed, doubl
     }
   }
 
-  joints_[WHEEL_ACTUATED]->SetParam("vel", 0, applied_speed);
-  joints_[WHEEL_ACTUATED_LEFT]->SetParam("vel", 0, applied_speed);
-  joints_[WHEEL_ACTUATED_RIGHT]->SetParam("vel", 0, applied_speed);
+  joints_[joint]->SetParam("vel", 0, applied_speed);
+}
 
-  double current_angle = joints_[STEERING]->Position(0);
+void GazeboRosAckermannDrive2Private::SteeringController(JointType joint, double target_angle, double dt)
+{
+  double applied_angle = target_angle;
+  double current_angle = joints_[joint]->Position(0);
 
   // truncate target angle
   if (target_angle > +M_PI / 2.0)
@@ -638,7 +646,7 @@ void GazeboRosAckermannDrive2Private::MotorController(double target_speed, doubl
       // we're withing angle tolerance
       applied_steering_speed = 0;
     }
-    else if (diff_angle < target_speed)
+    else if (diff_angle >= max_steering_angle_tol_)
     {
       // steer toward target angle
       applied_steering_speed = max_steering_speed_;
@@ -650,9 +658,7 @@ void GazeboRosAckermannDrive2Private::MotorController(double target_speed, doubl
     }
 
     // use speed control, not recommended, for better dynamics use force control
-    joints_[STEERING]->SetParam("vel", 0, applied_steering_speed);
-    joints_[STEERING_LEFT]->SetParam("vel", 0, applied_steering_speed);
-    joints_[STEERING_RIGHT]->SetParam("vel", 0, applied_steering_speed);
+    joints_[joint]->SetParam("vel", 0, applied_steering_speed);
   }
   else
   {
@@ -675,10 +681,20 @@ void GazeboRosAckermannDrive2Private::MotorController(double target_speed, doubl
       applied_angle = target_angle;
     }
 
-    joints_[STEERING]->SetPosition(0, applied_angle, true);
-    joints_[STEERING_LEFT]->SetPosition(0, applied_angle, true);
-    joints_[STEERING_RIGHT]->SetPosition(0, applied_angle, true);
+    joints_[joint]->SetPosition(0, applied_angle, true);
   }
+}
+
+void GazeboRosAckermannDrive2Private::MotorController(double target_speed, double target_angle, double dt)
+{
+  SpeedController(WHEEL_ACTUATED, target_speed, dt);
+  SpeedController(WHEEL_ACTUATED_LEFT, target_speed, dt);
+  SpeedController(WHEEL_ACTUATED_RIGHT, target_speed, dt);
+
+  SteeringController(STEERING, target_angle, dt);
+  SteeringController(STEERING_LEFT, target_angle, dt);
+  SteeringController(STEERING_RIGHT, target_angle, dt);
+
   //  RCLCPP_INFO(ros_node_->get_logger(),
   //  "target: [%3.2f, %3.2f], current: [%3.2f, %3.2f], applied: [%3.2f, %3.2f/%3.2f] ",
   //   target_speed, target_angle, current_speed, current_angle, applied_speed,
