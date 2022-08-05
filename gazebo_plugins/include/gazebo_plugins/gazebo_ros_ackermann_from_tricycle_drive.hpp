@@ -46,7 +46,7 @@ class GazeboRosAckermannDrive2Private;
   Example Usage:
   \code{.xml}
 
-  <plugin name='tricycle_drive' filename='libgazebo_ros_tricycle_drive.so'>
+  <plugin name='gazebo_ros_ackermann_from_tricycle_drive' filename='libgazebo_ros_ackermann_from_tricycle_drive.so'>
 
     <ros>
       <namespace></namespace>
@@ -54,29 +54,41 @@ class GazeboRosAckermannDrive2Private;
       <remapping>odom:=odom</remapping>
     </ros>
 
-    <!-- wheels -->
-    <steering_joint>wheel_front_steer</steering_joint>
-    <actuated_wheel_joint>wheel_front_spin</actuated_wheel_joint>
-    <encoder_wheel_left_joint>wheel_rear_left_spin</encoder_wheel_left_joint>
-    <encoder_wheel_right_joint>wheel_rear_right_spin</encoder_wheel_right_joint>
+    <update_rate>10.0</update_rate>
 
-    <!-- kinematics -->
-    <wheel_separation>1.0</wheel_separation>
-    <encoder_wheel_diameter>0.3</encoder_wheel_diameter>
-    <actuated_wheel_diameter>0.3</actuated_wheel_diameter>
+    <publish_odom>false</publish_odom>
+    <publish_odom_tf>false</publish_odom_tf>
 
-    <!-- limits -->
-    <max_wheel_torque>20</max_wheel_torque>
-    <max_wheel_acceleration>5.0</max_wheel_acceleration>
-    <max_steering_speed>1.0</max_steering_speed>
 
-    <!-- output -->
-    <publish_odom>true</publish_odom>
-    <publish_wheel_tf>true</publish_wheel_tf>
+    <steering_joint>back_steering_joint</steering_joint>
+    <actuated_wheel_joint>back_wheel_joint</actuated_wheel_joint>
+
+    <right_steering_joint>back_right_wheel_steering_joint</right_steering_joint>
+    <actuated_right_wheel_joint>back_right_wheel_joint</actuated_right_wheel_joint>
+
+    <left_steering_joint>back_left_wheel_steering_joint</left_steering_joint>
+    <actuated_left_wheel_joint>back_left_wheel_joint</actuated_left_wheel_joint>
+
+    <encoder_wheel_left_joint>front_left_wheel_joint</encoder_wheel_left_joint>
+    <encoder_wheel_right_joint>front_right_wheel_joint</encoder_wheel_right_joint>
+
+    <publish_wheel_tf>false</publish_wheel_tf>
     <publish_wheel_joint_state>true</publish_wheel_joint_state>
 
+    <actuated_wheel_diameter>0.440</actuated_wheel_diameter>
+    <encoder_wheel_diameter>0.540</encoder_wheel_diameter>
+    <wheel_separation>1.500</wheel_separation>
+
+    <odometry_source>0</odometry_source>
     <odometry_frame>odom</odometry_frame>
-    <robot_base_frame>fork</robot_base_frame>
+    <robot_base_frame>base_footprint</robot_base_frame>
+
+    <max_wheel_acceleration>3.0</max_wheel_acceleration>
+    <max_wheel_deceleration>3.0</max_wheel_deceleration>
+    <max_wheel_speed_tolerance>0.05</max_wheel_speed_tolerance>
+    <max_wheel_torque>20000</max_wheel_torque>
+    <max_steering_speed>3.14</max_steering_speed>
+    <max_steering_angle_tolerance>0.2</max_steering_angle_tolerance>
 
   </plugin>
 
