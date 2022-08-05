@@ -360,12 +360,12 @@ if(ENABLE_PROFILER)
   target_link_libraries(gazebo_ros_ackermann_drive ${ignition-common3_LIBRARIES})
 endif()
 
-# gazebo_ros_ackermann_drive2
-add_library(gazebo_ros_ackermann_drive2 SHARED
-  src/gazebo_ros_ackermann_drive2.cpp
+# gazebo_ros_ackermann_from_tricycle_drive
+add_library(gazebo_ros_ackermann_from_tricycle_drive SHARED
+  src/gazebo_ros_ackermann_from_tricycle_drive.cpp
 )
-target_include_directories(gazebo_ros_ackermann_drive2 PUBLIC include)
-ament_target_dependencies(gazebo_ros_ackermann_drive2
+target_include_directories(gazebo_ros_ackermann_from_tricycle_drive PUBLIC include)
+ament_target_dependencies(gazebo_ros_ackermann_from_tricycle_drive
   "gazebo_ros"
   "geometry_msgs"
   "nav_msgs"
@@ -375,10 +375,10 @@ ament_target_dependencies(gazebo_ros_ackermann_drive2
   "tf2_geometry_msgs"
   "tf2_ros"
 )
-ament_export_libraries(gazebo_ros_ackermann_drive2)
+ament_export_libraries(gazebo_ros_ackermann_from_tricycle_drive)
 if(ENABLE_PROFILER)
-  target_include_directories(gazebo_ros_ackermann_drive2 PUBLIC ${ignition-common3_INCLUDE_DIRS})
-  target_link_libraries(gazebo_ros_ackermann_drive2 ${ignition-common3_LIBRARIES})
+  target_include_directories(gazebo_ros_ackermann_from_tricycle_drive PUBLIC ${ignition-common3_INCLUDE_DIRS})
+  target_link_libraries(gazebo_ros_ackermann_from_tricycle_drive ${ignition-common3_LIBRARIES})
 endif()
 
 # gazebo_ros_elevator
@@ -519,7 +519,7 @@ install(DIRECTORY include/
 
 install(TARGETS
     gazebo_ros_ackermann_drive
-    gazebo_ros_ackermann_drive2
+    gazebo_ros_ackermann_from_tricycle_drive
     gazebo_ros_bumper
     gazebo_ros_camera
     gazebo_ros_diff_drive

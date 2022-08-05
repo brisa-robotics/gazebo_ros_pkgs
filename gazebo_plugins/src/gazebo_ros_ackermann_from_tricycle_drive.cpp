@@ -46,7 +46,7 @@
 #include <gazebo/physics/World.hh>
 #include <gazebo/physics/Model.hh>
 #include <gazebo/physics/Link.hh>
-#include <gazebo_plugins/gazebo_ros_ackermann_drive2.hpp>
+#include <gazebo_plugins/gazebo_ros_ackermann_from_tricycle_drive.hpp>
 #include <gazebo_ros/conversions/builtin_interfaces.hpp>
 #include <gazebo_ros/conversions/geometry_msgs.hpp>
 #include <gazebo_ros/node.hpp>
@@ -547,7 +547,12 @@ void GazeboRosAckermannDrive2Private::OnUpdate(const gazebo::common::UpdateInfo&
   if (seconds_since_last_update < update_period_)
   {
     return;
-    SpeedController IGN_PROFILE_BEGIN("PublishOdometryMsg");
+  }
+
+  if (publish_odom_)
+  {
+#ifdef IGN_PROFILER_ENABLE
+    IGN_PROFILE_BEGIN("PublishOdometryMsg");
 #endif
     PublishOdometryMsg(current_time);
 #ifdef IGN_PROFILER_ENABLE
